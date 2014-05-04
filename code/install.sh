@@ -16,7 +16,7 @@ N="/dev/null";pushd .>$N;cd `dirname ${CURDIR}`>$N;CURDIR=`pwd`;popd>$N
 IS_DEB=0
 IS_FEDORA=0
 IS_DARWIN=0
-IS_OPENSUSE=0
+IS_SUSE=0
 
 RUN=0
 
@@ -34,7 +34,7 @@ brew --help > /dev/null 2>&1
 if (($? == 0)) ; then IS_DARWIN=1 ; fi
 
 zypper --help > /dev/null 2>&1
-if (($? == 0)) ; then IS_OPENSUSE=1 ; fi
+if (($? == 0)) ; then IS_SUSE=1 ; fi
 
 #
 # Run an OS-specific installer
@@ -60,7 +60,7 @@ fi
 
 if [ $IS_SUSE -eq 1 ]
 then
-  bash $CURDIR/_install-opensuse.sh
+  bash $CURDIR/_install-suse.sh
   RUN=1
 fi
 
