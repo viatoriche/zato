@@ -16,6 +16,7 @@ N="/dev/null";pushd .>$N;cd `dirname ${CURDIR}`>$N;CURDIR=`pwd`;popd>$N
 IS_DEB=0
 IS_FEDORA=0
 IS_DARWIN=0
+IS_OPENSUSE=0
 
 RUN=0
 
@@ -32,18 +33,15 @@ if (($? == 0)) ; then IS_FEDORA=1 ; fi
 brew --help > /dev/null 2>&1
 if (($? == 0)) ; then IS_DARWIN=1 ; fi
 
+zypper --help > /dev/null 2>&1
+if (($? == 0)) ; then IS_OPENSUSE=1 ; fi
+
 #
 # Run an OS-specific installer
 #
 
 if [ $IS_DEB -eq 1 ]
 then
-    if command -v lsb_release > /dev/null; then
-        release=$(lsb_release -r | cut -f2)
-        if [[ "$release" == "14.04" ]]; then
-            sed -i 's/libumfpack5.4.0/libumfpack5.6.2/' $CURDIR/_install-deb.sh
-        fi
-    fi
   bash $CURDIR/_install-deb.sh
   RUN=1
 fi
@@ -60,12 +58,18 @@ then
   RUN=1
 fi
 
+if [ $IS_SUSE -eq 1 ]
+then
+  bash $CURDIR/_install-opensuse.sh
+  RUN=1
+fi
+
 #
 # Unknown system
 #
 
 if [ $RUN -ne 1 ]
 then
-   echo "Could not find apt-get, yum nor brew. OS could not be determined, installer cannot run."
+   echo "Could not find apt-get, yum, brew nor zypper. OS could not be determined, installer cannot run."
    exit 1
 fi
