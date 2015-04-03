@@ -22,6 +22,7 @@ from zato.admin.web.views.channel import stomp as channel_stomp
 from zato.admin.web.views.channel import zmq as channel_zmq
 from zato.admin.web.views.cloud.aws import s3 as cloud_aws_s3
 from zato.admin.web.views.cloud.openstack import swift as cloud_openstack_swift
+from zato.admin.web.views.config import runtime as config_runtime
 from zato.admin.web.views.definition import amqp as def_amqp
 from zato.admin.web.views.definition import cassandra as def_cassandra
 from zato.admin.web.views.definition import jms_wmq as def_jms_wmq
@@ -166,6 +167,19 @@ urlpatterns += patterns('',
         login_required(service.slow_response_details), name='service-slow-response-details'),
     url(r'^zato/service/slow-response/(?P<service_name>.*)/$',
         login_required(service.slow_response), name='service-slow-response'),
+    )
+
+# ################################################################################################################################
+
+urlpatterns += patterns('',
+
+    # Config
+
+    url(r'^zato/config/runtime/$',
+        login_required(config_runtime.Index()), name=config_runtime.Index.url_name),
+    url(r'^zato/config/runtime/details/(?P<name>.*)/cluster/(?P<cluster_id>.*)/$',
+        login_required(config_runtime.details), name='config-runtime-details'),
+
     )
 
 # ################################################################################################################################

@@ -58,6 +58,7 @@
                 <li><span class="like-a">Services &darr;</span>
                     <ul>
                         <li><a href="{% url service %}?cluster={{ cluster_id|default:'' }}">List services</a></li>
+                        <li><a href="{% url config-runtime %}?cluster={{ cluster_id|default:'' }}">Run-time config</a></li>
                     </ul>
                 </li>
 

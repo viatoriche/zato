@@ -61,6 +61,8 @@ $.namespace('zato.cloud.openstack');
 $.namespace('zato.cloud.openstack.swift');
 $.namespace('zato.cluster');
 $.namespace('zato.cluster.servers');
+$.namespace('zato.config');
+$.namespace('zato.config.runtime');
 $.namespace('zato.data_table');
 $.namespace('zato.definition');
 $.namespace('zato.definition.amqp');
