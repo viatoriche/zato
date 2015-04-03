@@ -28,12 +28,12 @@ class Index(_Index):
     method_allowed = 'GET'
     url_name = 'config-runtime'
     template = 'zato/config/runtime/index.html'
-    service_name = 'zato.config.runtime/get-list'
+    service_name = 'zato.config.runtime.get-list'
     output_class = ConfigItem
 
     class SimpleIO(_Index.SimpleIO):
         input_required = ('cluster_id',)
-        output_required = ('name', 'full_path')
+        output_required = ('name', 'full_path', 'access_rights')
         output_repeated = True
 
     def handle(self):
