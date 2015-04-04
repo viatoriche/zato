@@ -156,8 +156,9 @@ flush_at_shutdown=True
 url_path=/zato-profiler
 unwind=False
 
-[user_config]
+[runtime_config]
 # All paths are either absolute or relative to the directory server.conf is in
+pickup_dir=./ini
 user=./user.conf
 
 [newrelic]

@@ -23,12 +23,13 @@ class ConfigItem(object):
     def __init__(self):
         self.name = ''
         self.full_path = ''
+        self.access_rights = ''
 
 class Index(_Index):
     method_allowed = 'GET'
     url_name = 'config-runtime'
     template = 'zato/config/runtime/index.html'
-    service_name = 'zato.config.runtime.get-list'
+    service_name = 'tmp.runtime.get-list'
     output_class = ConfigItem
 
     class SimpleIO(_Index.SimpleIO):

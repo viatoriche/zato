@@ -22,7 +22,7 @@ from anyjson import dumps
 import arrow
 
 # Bunch
-from bunch import bunchify
+from bunch import Bunch, bunchify
 
 # lxml
 from lxml.etree import _Element as EtreeElement
@@ -195,7 +195,7 @@ class Service(object):
         self.impl_name = self.__class__.get_impl_name()
         self.time = TimeUtil(None)
         self.patterns = None
-        self.user_config = None
+        self.user_config = self.conf = Bunch() # Backward compat, self.user_config -> self.conf
         self.dictnav = DictNav
         self.listnav = ListNav
         self.has_validate_input = False
@@ -821,7 +821,8 @@ class Service(object):
         service.job_type = job_type
         service.translate = server.kvdb.translate
         service.delivery_store = server.delivery_store
-        service.user_config = server.user_config
+        service.user_config.update(server.user_config)
+        service.conf = service.user_config
 
         if channel_params:
             service.request.channel_params.update(channel_params)

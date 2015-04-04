@@ -62,7 +62,7 @@
                         <th><a href="#">Access rights</a></th>
                         <th>&nbsp;</th>
                         <th>&nbsp;</th>
-                        <th>&nbsp;</th>
+                        <th class='ignore'>&nbsp;</th>
                 </thead>
 
                 <tbody>
@@ -73,9 +73,9 @@
                         <td class="impexp"><input type="checkbox" /></td>
                         <td>{{ item.name }}</td>
                         <td>{{ item.full_path }}</td>
-                        <td>{{ item.access_rights }}</td>
-                        <td><a href="javascript:$.fn.zato.channel.zmq.edit('{{ item.full_path }}')">Edit</a></td>
-                        <td><a href="javascript:$.fn.zato.channel.zmq.delete_('{{ item.full_path }}')">Delete</a></td>
+                        <td>{{ item.access_rights|default:"<span class='form_hint'>(None)</span>" }}</td>
+                        <td>{% if item.access_rights %}<a href="javascript:$.fn.zato.channel.zmq.edit('{{ item.full_path }}')">Edit</a>{% else %}<span class='form_hint'>Edit</span>{% endif %}</td>
+                        <td>{% if item.access_rights %}<a href="javascript:$.fn.zato.channel.zmq.delete_('{{ item.full_path }}')">Delete</a>{% else %}<span class='form_hint'>Delete</span>{% endif %}</td>
                         <td class='ignore item_id_{{ item.full_path }}'>{{ item.full_path }}</td>
                     </tr>
                 {% endfor %}
