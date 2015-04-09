@@ -61,5 +61,11 @@ class GetList(AdminService):
             else:
                 for dir_path in item if isinstance(item, list) else [item]:
                     full_pickup_dir = p.join(self.server.repo_location, dir_path)
-                    for path in os.listdir(full_pickup_dir):
-                        self._append(path, dir_path, *self._get_info(path, full_pickup_dir))
+
+                    if p.exists(full_pickup_dir):
+                        for path in os.listdir(full_pickup_dir):
+                            full_path = p.abspath(p.join(full_pickup_dir, path))
+                            if p.isfile(full_path):
+                                self._append(path, dir_path, *self._get_info(full_path, full_pickup_dir))
+                    else:
+                        self.logger.warn('No such directory `%s` (%s)`', full_pickup_dir, dir_path)
