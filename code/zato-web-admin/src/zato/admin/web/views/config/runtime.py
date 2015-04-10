@@ -13,8 +13,10 @@ import logging
 
 # Django
 from django.http import HttpResponse, HttpResponseServerError
+from django.template.response import TemplateResponse
 
 # Zato
+from zato.admin.web.forms.config.runtime import EditFileSourceForm
 from zato.admin.web.views import Index as _Index, method_allowed
 
 logger = logging.getLogger(__name__)
@@ -34,12 +36,24 @@ class Index(_Index):
 
     class SimpleIO(_Index.SimpleIO):
         input_required = ('cluster_id',)
-        output_required = ('name', 'full_path', 'access_rights')
+        output_required = ('name', 'full_path', 'access_rights', 'pickup_dir')
         output_repeated = True
 
     def handle(self):
         return {}
 
 @method_allowed('GET')
-def details(req, **kwargs):
-    return 'zz'
+def edit(req, name, pickup_dir, cluster_id):
+
+    return_data = {
+        'form': EditFileSourceForm(),
+        'name': name,
+        'pickup_dir': pickup_dir,
+        'cluster_id': cluster_id
+    }
+
+    return TemplateResponse(req, 'zato/config/runtime/edit.html', return_data)
+
+@method_allowed('POST')
+def edit_validate_save(req, name, pickup_dir, cluster_id):
+    return 'zzz'

@@ -74,7 +74,7 @@
                         <td>{{ item.name }}</td>
                         <td>{{ item.full_path }}</td>
                         <td>{{ item.access_rights|default:"<span class='form_hint'>(None)</span>" }}</td>
-                        <td>{% if item.access_rights %}<a href="javascript:$.fn.zato.channel.zmq.edit('{{ item.full_path }}')">Edit</a>{% else %}<span class='form_hint'>Edit</span>{% endif %}</td>
+                        <td>{% if item.access_rights %}<a href="{% url config-runtime-edit item.name item.pickup_dir cluster_id %}">Edit</a>{% else %}<span class='form_hint'>Edit</span>{% endif %}</td>
                         <td>{% if item.access_rights %}<a href="javascript:$.fn.zato.channel.zmq.delete_('{{ item.full_path }}')">Delete</a>{% else %}<span class='form_hint'>Delete</span>{% endif %}</td>
                         <td class='ignore item_id_{{ item.full_path }}'>{{ item.full_path }}</td>
                     </tr>

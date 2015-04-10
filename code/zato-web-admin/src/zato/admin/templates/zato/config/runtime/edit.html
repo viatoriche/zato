@@ -1,0 +1,42 @@
+{% extends "zato/index.html" %}
+
+{% block html_title %}Edit file{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block extra_js %}
+
+    {% comment %} jQuery {% endcomment %}
+    <script type="text/javascript" src="/static/jquery/jquery.cookie.js"></script>
+
+    <script type="text/javascript" src="/static/js/common.js"></script>
+    <script type="text/javascript" src="/static/js/config/runtime/edit.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<h2 class="zato">Run-time config files : {{ name }}</h2>
+
+<div id="user-message-div" style='display:none'><pre id="user-message" class="user-message"></pre></div>
+
+
+<div id="markup">
+    <form action="{% url config-runtime-edit-validate-save name pickup_dir cluster_id %}" method="post" id="validate-save">
+        <table id="data-table">
+            <tr>
+                <td>
+                    {{ form.source }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right">
+                    <button id="validate" name="validate" type="submit">Validate config</button>
+                    <button id="validate_save" name="validate_save" type="submit">Validate and save</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+{% endblock %}

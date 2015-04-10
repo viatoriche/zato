@@ -177,8 +177,10 @@ urlpatterns += patterns('',
 
     url(r'^zato/config/runtime/$',
         login_required(config_runtime.Index()), name=config_runtime.Index.url_name),
-    url(r'^zato/config/runtime/details/(?P<name>.*)/cluster/(?P<cluster_id>.*)/$',
-        login_required(config_runtime.details), name='config-runtime-details'),
+    url(r'^zato/config/runtime/edit/name/(?P<name>.*)/pickup-dir/(?P<pickup_dir>.*)/cluster/(?P<cluster_id>.*)/$',
+        login_required(config_runtime.edit), name='config-runtime-edit'),
+    url(r'^zato/config/runtime/edit/name/(?P<name>.*)/pickup-dir/(?P<pickup_dir>.*)/cluster/(?P<cluster_id>.*)/validate-save$',
+        login_required(config_runtime.edit_validate_save), name='config-runtime-edit-validate-save'),
 
     )
 
