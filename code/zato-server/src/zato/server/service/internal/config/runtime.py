@@ -73,8 +73,8 @@ class RuntimeConfigManager(object):
                     else:
                         logger.warn('No such directory `%s` (%s)`', full_pickup_dir, dir_path)
 
-    def get_list(self):
-        pass
+    def get_items(self):
+        return self.items
 
     def validate(self, name, pickup_dir, source):
         pass
@@ -98,4 +98,4 @@ class GetList(AdminService):
         output_repeated = True
 
     def handle(self):
-        return RuntimeConfigManager(self.server).get_list()
+        self.response.payload[:] = RuntimeConfigManager(self.server).get_items()
