@@ -19,6 +19,18 @@ from zato.server.service.internal import AdminService, AdminSIO
 
 logger = logging.getLogger(__name__)
 
+# ################################################################################################################################
+
+class ValidationResult(object):
+    def __init__(self):
+        self.is_valid = False
+        self.details = ''
+
+    def __nonzero__(self):
+        return self.is_valid
+
+# ################################################################################################################################
+
 class RuntimeConfigManager(object):
     """ An object through which access to run-time config files is mediated,
     including all of CRUD. Raises exceptions if attempts are made to edit/create/delete
@@ -76,14 +88,27 @@ class RuntimeConfigManager(object):
     def get_items(self):
         return self.items
 
-    def validate(self, name, pickup_dir, source):
-        pass
+    def validate(self, source):
+        result = ValidationResult()
+        details = []
+
+        if not source:
+            details.append('Config file is empty')
+        else:
+            for line in source:
+                Z Z Z
+
+        result.details = '\n'.join(details)
 
     def edit(self, name, pickup_dir, source):
-        pass
+        result = self.validate(source)
+        if not result:
+            raise ValueError('Invalid config file: `{}`'.format(result.details)
 
     def create(self, name, pickup_dir, source):
         pass
+
+# ################################################################################################################################
 
 class GetList(AdminService):
     """ Returns a list of run-time config files available.
