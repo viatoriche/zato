@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 # stdlib
 import copy, errno, gc, inspect, json, linecache, logging, os, random, re, signal, string, threading, traceback, sys
+from ast import literal_eval
 from contextlib import closing
 from cStringIO import StringIO
 from datetime import datetime
@@ -813,7 +814,7 @@ def register_diag_handlers():
 
 # ################################################################################################################################
 
-def parse_extra_into_dict(lines, convert_bool=True):
+def parse_key_value(lines, convert_bool=True):
     """ Creates a dictionary out of key=value lines.
     """
     _extra = {}
@@ -826,7 +827,7 @@ def parse_extra_into_dict(lines, convert_bool=True):
             if line:
                 line = line.split('=')
                 if not len(line) == 2:
-                    raise ValueError('Each line must be a single key=value entry, not [{}]'.format(original_line))
+                    raise ValueError('Each line must be a single key=value entry, not `{}`'.format(original_line))
 
                 key, value = line
                 value = value.strip()
@@ -838,13 +839,7 @@ def parse_extra_into_dict(lines, convert_bool=True):
                         # It's cool, not a boolean
                         pass
 
-                try:
-                    value = is_integer(value)
-                except VdtTypeError:
-                    # OK, not an integer
-                    pass
-
-                _extra[key.strip()] = value
+                _extra[key.strip()] = literal_eval(value)
 
     return _extra
 

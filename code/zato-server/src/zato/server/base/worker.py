@@ -46,7 +46,7 @@ from zato.common.dispatch import dispatcher
 from zato.common.match import Matcher
 from zato.common.pubsub import Client, Consumer, Topic
 from zato.common.util import get_tls_ca_cert_full_path, get_tls_key_cert_full_path, get_tls_from_payload, new_cid, pairwise, \
-     parse_extra_into_dict, parse_tls_channel_security_definition, store_tls
+     parse_key_value, parse_tls_channel_security_definition, store_tls
 from zato.server.base import BrokerMessageReceiver
 from zato.server.connection.cassandra import CassandraAPI, CassandraConnStore
 from zato.server.connection.cloud.aws.s3 import S3Wrapper
@@ -210,7 +210,7 @@ class WorkerStore(BrokerMessageReceiver):
         msg.port = url_info.port if url_info.port else (443 if msg.is_secure else 80)
         msg.host = url_info.netloc
 
-        msg.metadata = parse_extra_into_dict(msg.metadata_)
+        msg.metadata = parse_key_value(msg.metadata_)
 
     def _http_soap_wrapper_from_config(self, config, has_sec_config=True):
         """ Creates a new HTTP/SOAP connection wrapper out of a configuration

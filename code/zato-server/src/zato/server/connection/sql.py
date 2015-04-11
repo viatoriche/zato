@@ -30,7 +30,7 @@ from springpython.context import DisposableObject
 # Zato
 from zato.common import Inactive, SECRET_SHADOW
 from zato.common.odb import ping_queries
-from zato.common.util import get_component_name, get_engine_url, parse_extra_into_dict
+from zato.common.util import get_component_name, get_engine_url, parse_key_value
 
 class SessionWrapper(object):
     """ Wraps an SQLAlchemy session.
@@ -89,7 +89,7 @@ class SQLConnectionPool(object):
             _extra['connect_args'] = {'application_name': get_component_name()}
 
         extra = self.config.get('extra') # Optional, hence .get
-        _extra.update(parse_extra_into_dict(extra))
+        _extra.update(parse_key_value(extra))
 
         # SQLite has no pools
         if self.engine_name != 'sqlite':

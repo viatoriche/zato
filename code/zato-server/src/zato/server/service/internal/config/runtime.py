@@ -15,6 +15,7 @@ from stat import S_IMODE
 from traceback import format_exc
 
 # Zato
+from zato.common.util import parse_key_value
 from zato.server.service.internal import AdminService, AdminSIO
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,9 @@ logger = logging.getLogger(__name__)
 # ################################################################################################################################
 
 class ValidationResult(object):
-    def __init__(self):
-        self.is_valid = False
-        self.details = ''
+    def __init__(self, details):
+        self.details = details
+        self.is_valid = not details
 
     def __nonzero__(self):
         return self.is_valid
@@ -89,21 +90,23 @@ class RuntimeConfigManager(object):
         return self.items
 
     def validate(self, source):
-        result = ValidationResult()
-        details = []
+        details = ''
 
         if not source:
-            details.append('Config file is empty')
+            details = 'Config file is empty'
         else:
-            for line in source:
-                Z Z Z
+            parse_key_value(source)
+            #try:
+            #    parse_key_value(source)
+            #except Exception, e:
+            #    details = e.message
 
-        result.details = '\n'.join(details)
+        return ValidationResult(details)
 
     def edit(self, name, pickup_dir, source):
         result = self.validate(source)
         if not result:
-            raise ValueError('Invalid config file: `{}`'.format(result.details)
+            raise ValueError('Invalid config file: `{}`'.format(result.details))
 
     def create(self, name, pickup_dir, source):
         pass
