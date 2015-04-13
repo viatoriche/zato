@@ -814,6 +814,43 @@ def register_diag_handlers():
 
 # ################################################################################################################################
 
+def parse_value(value, return_value_if_string=True, convert_bool=True):
+    if value:
+        value = value.strip()
+
+        try:
+            value = is_integer(value)
+        except VdtTypeError:
+            # Not an integer either
+
+            if convert_bool:
+                try:
+                    value = is_boolean(value)
+                except VdtTypeError:
+                    # It's cool, not a boolean
+                    pass
+
+        # Still not an int nor a bool so could it be a dict?
+        if isinstance(value, basestring) and value[0] == '{':
+            value = literal_eval(value)
+
+        # Must be a string so we just leave it as is, however, our callers may prefer to be given None
+        # if it turned out be a string.
+        return value
+
+def parse_key_value_line(line, convert_bool=True):
+    original_line = line
+
+    line = line.split('=')
+
+    if not len(line) == 2 or not all(line):
+        raise ValueError('Each line must be a single key=value entry, not `{}`'.format(original_line))
+
+    key, value = line
+    value = parse_value(value, True, convert_bool)
+
+    return key, value
+
 def parse_key_value(lines, convert_bool=True):
     """ Creates a dictionary out of key=value lines.
     """
@@ -823,34 +860,8 @@ def parse_key_value(lines, convert_bool=True):
         extra = ';'.join(lines.splitlines())
 
         for line in extra.split(';'):
-            original_line = line
             if line:
-                line = line.split('=')
-
-                if not len(line) == 2 or not all(line):
-                    raise ValueError('Each line must be a single key=value entry, not `{}`'.format(original_line))
-
-                key, value = line
-                value = value.strip()
-
-                try:
-                    value = is_integer(value)
-                except VdtTypeError:
-                    # Not an integer either
-
-                    if convert_bool:
-                        try:
-                            value = is_boolean(value)
-                        except VdtTypeError:
-                            # It's cool, not a boolean
-                            pass
-
-                # Still not an int nor a bool so could it be a dict?
-                if isinstance(value, basestring) and value[0] == '{':
-                    value = literal_eval(value)
-
-                # Must be a string so we just leave it as is
-
+                key, value = parse_key_value_line(line, convert_bool=convert_bool)
                 _extra[key.strip()] = value
 
     return _extra

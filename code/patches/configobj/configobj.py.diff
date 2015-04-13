@@ -1,0 +1,19 @@
+--- configobj.py.orig	2015-04-13 22:18:19.498298724 +0200
++++ configobj.py	2015-04-13 22:18:27.914298860 +0200
+@@ -1850,6 +1850,16 @@
+         Given a value string, unquote, remove comment,
+         handle lists. (including empty and single member lists)
+         """
++        from zato.common.util import parse_value
++
++        value = parse_value(value, False)
++
++        if value is None:
++            return '', ''
++
++        if not isinstance(value, basestring):
++            return value, ''
++
+         if self._inspec:
+             # Parsing a configspec so don't handle comments
+             return (value, '')

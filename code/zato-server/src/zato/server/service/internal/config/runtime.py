@@ -10,9 +10,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 # stdlib
 import logging, os
+from cStringIO import StringIO
 from os import path as p
 from stat import S_IMODE
 from traceback import format_exc
+
+# ConfigObj
+from configobj import ConfigObj
 
 # Zato
 from zato.common.util import parse_key_value
@@ -23,9 +27,10 @@ logger = logging.getLogger(__name__)
 # ################################################################################################################################
 
 class ValidationResult(object):
-    def __init__(self, details):
+    def __init__(self, details, config):
         self.details = details
         self.is_valid = not details
+        self.config = config
 
     def __nonzero__(self):
         return self.is_valid
@@ -98,16 +103,18 @@ class RuntimeConfigManager(object):
         """ Validates a config file's source.
         """
         details = ''
+        config = None
 
         if not source:
             details = 'Config file is empty'
         else:
             try:
-                parse_key_value(source)
+                config = ConfigObj(StringIO(source))
             except Exception, e:
                 details = e.message
+                print(9090, format_exc(e))
 
-        return ValidationResult(details)
+        return ValidationResult(details, config)
 
     def edit(self, name, pickup_dir, source):
         """ Validates and updates contents of an existing config file.

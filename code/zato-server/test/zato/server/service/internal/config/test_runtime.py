@@ -153,4 +153,11 @@ class TestRuntimeConfigManager(TestCase):
             self.assertFalse(result)
             self.assertEquals(result.details, 'Config file is empty')
 
+            result = rcm.validate('[abc]\naa=bb\ncc=dd\ncc2=123\n[def]\nee=ff\ngg=hh\nzzz=\n[qwe]\naa={"a":"b","c":123,"d":2.0}')
+            self.assertTrue(result)
+            self.assertListEqual(result.config.keys(), ['abc', 'def', 'qwe'])
+            self.assertDictEqual(result.config['abc'], {'aa': 'bb', 'cc': 'dd', 'cc2': 123})
+            self.assertDictEqual(result.config['def'], {'ee': 'ff', 'gg': 'hh', 'zzz': ''})
+            self.assertDictEqual(result.config['qwe'], {'aa': {'a': 'b', 'c': 123, 'd': 2.0}})
+
         self._run_test(assert_func)
