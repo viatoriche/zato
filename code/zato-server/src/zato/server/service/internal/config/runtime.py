@@ -44,14 +44,16 @@ class RuntimeConfigManager(object):
         if needs_read:
             self.read()
 
-    def _append(self, name, pickup_dir, full_path, access_rights, ):
-
+    def _append(self, name, pickup_dir, full_path, access_rights):
+        """ Appends information on a given config file to our list of results.
+        """
         self.items.append({
             'name':name, 'full_path':full_path, 'access_rights':access_rights, 'pickup_dir':pickup_dir
         })
 
     def _get_info(self, path, parent_dir=None):
-
+        """ Establishes a full path + access rights of config file.
+        """
         if not p.isabs(path):
             full_path = p.abspath(p.normpath(p.join(parent_dir or self.server.repo_location, path)))
         else:
@@ -66,7 +68,8 @@ class RuntimeConfigManager(object):
         return full_path, access_rights
 
     def read(self):
-
+        """ Reads a list of config files into self.items - doesn't read their contents.
+        """
         for name, item in sorted(self.server.fs_server_config.runtime_config.iteritems()):
 
             # Regular static files
@@ -87,28 +90,35 @@ class RuntimeConfigManager(object):
                         logger.warn('No such directory `%s` (%s)`', full_pickup_dir, dir_path)
 
     def get_items(self):
+        """ Returns a list of config files info.
+        """
         return self.items
 
     def validate(self, source):
+        """ Validates a config file's source.
+        """
         details = ''
 
         if not source:
             details = 'Config file is empty'
         else:
-            parse_key_value(source)
-            #try:
-            #    parse_key_value(source)
-            #except Exception, e:
-            #    details = e.message
+            try:
+                parse_key_value(source)
+            except Exception, e:
+                details = e.message
 
         return ValidationResult(details)
 
     def edit(self, name, pickup_dir, source):
+        """ Validates and updates contents of an existing config file.
+        """
         result = self.validate(source)
         if not result:
             raise ValueError('Invalid config file: `{}`'.format(result.details))
 
     def create(self, name, pickup_dir, source):
+        """ Creates a new config file.
+        """
         pass
 
 # ################################################################################################################################

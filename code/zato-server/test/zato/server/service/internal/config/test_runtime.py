@@ -150,13 +150,7 @@ class TestRuntimeConfigManager(TestCase):
 
             # No source
             result = rcm.validate('')
-
             self.assertFalse(result)
             self.assertEquals(result.details, 'Config file is empty')
-
-            # Malformed source
-            result = rcm.validate('aaa=')
-
-            self.assertFalse(result)
 
         self._run_test(assert_func)

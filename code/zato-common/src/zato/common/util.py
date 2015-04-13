@@ -826,7 +826,8 @@ def parse_key_value(lines, convert_bool=True):
             original_line = line
             if line:
                 line = line.split('=')
-                if not len(line) == 2:
+
+                if not len(line) == 2 or not all(line):
                     raise ValueError('Each line must be a single key=value entry, not `{}`'.format(original_line))
 
                 key, value = line
@@ -839,7 +840,19 @@ def parse_key_value(lines, convert_bool=True):
                         # It's cool, not a boolean
                         pass
 
-                _extra[key.strip()] = literal_eval(value)
+                    try:
+                        value = is_integer(value)
+                    except VdtTypeError:
+                        # Not an integer either
+                        pass
+
+                    # Could it be a dict?
+                    if value[0] == '{':
+                        value = literal_eval(value)
+
+                    # Must be a string so we just leave it as is
+
+                _extra[key.strip()] = value
 
     return _extra
 
