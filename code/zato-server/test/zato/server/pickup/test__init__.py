@@ -9,6 +9,7 @@ Licensed under LGPLv3, see LICENSE.txt for terms and conditions.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # stdlib
+import os
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 from uuid import uuid4
@@ -52,10 +53,11 @@ class BasePickupEventProcessorTest(TestCase):
             
             with NamedTemporaryFile(prefix='zato-test-', suffix=file_name) as tf:
                 tf.flush()
-                ret = processor.hot_deploy(tf.name)
+                ret = processor.hot_deploy(tf.name, os.path.abspath(tf.name))
                 self.assertEquals(ret, True)
                 
                 if delete_after_pick_up:
                     _os_remove.assert_called_with(tf.name)
                 else:
                     self.assertFalse(_os_remove.called)
+

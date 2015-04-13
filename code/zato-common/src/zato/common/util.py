@@ -833,24 +833,23 @@ def parse_key_value(lines, convert_bool=True):
                 key, value = line
                 value = value.strip()
 
-                if convert_bool:
-                    try:
-                        value = is_boolean(value)
-                    except VdtTypeError:
-                        # It's cool, not a boolean
-                        pass
+                try:
+                    value = is_integer(value)
+                except VdtTypeError:
+                    # Not an integer either
 
-                    try:
-                        value = is_integer(value)
-                    except VdtTypeError:
-                        # Not an integer either
-                        pass
+                    if convert_bool:
+                        try:
+                            value = is_boolean(value)
+                        except VdtTypeError:
+                            # It's cool, not a boolean
+                            pass
 
-                    # Could it be a dict?
-                    if value[0] == '{':
-                        value = literal_eval(value)
+                # Still not an int nor a bool so could it be a dict?
+                if isinstance(value, basestring) and value[0] == '{':
+                    value = literal_eval(value)
 
-                    # Must be a string so we just leave it as is
+                # Must be a string so we just leave it as is
 
                 _extra[key.strip()] = value
 

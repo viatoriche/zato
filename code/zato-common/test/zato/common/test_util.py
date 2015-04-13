@@ -78,37 +78,38 @@ class TLSTestCase(TestCase):
 class MiscTestCase(TestCase):
     def test_parse_key_value(self):
 
-        # Malformed source 1
-        result = rcm.validate('aaa=')
-        self.assertFalse(result)
-        self.assertEquals(result.details, 'Each line must be a single key=value entry, not `aaa=`')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('aaa=')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `aaa=`')
 
-        # Malformed source 2
-        result = rcm.validate('=11')
-        self.assertFalse(result)
-        self.assertEquals(result.details, 'Each line must be a single key=value entry, not `=11`')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('=11')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `=11`')
 
-        # Malformed source 3
-        result = rcm.validate('=')
-        self.assertFalse(result)
-        self.assertEquals(result.details, 'Each line must be a single key=value entry, not `=`')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('=')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `=`')
 
-        # Malformed source 3
-        result = rcm.validate('a=b\nc=')
-        self.assertFalse(result)
-        self.assertEquals(result.details, 'Each line must be a single key=value entry, not `c=`')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('a=b\nc=')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `c=`')
 
-        # Malformed source 3
-        result = rcm.validate('a=b\nc=d\n=e')
-        self.assertFalse(result)
-        self.assertEquals(result.details, 'Each line must be a single key=value entry, not `=e`')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('a=b\nc=d\n=e')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `=e`')
 
-        # OK 1
-        result = rcm.validate('a=b')
-        self.assertTrue(result)
-        self.assertEquals(result.details, '')
+        with self.assertRaises(ValueError) as info:
+            util.parse_key_value('a=b\nc=d\n=')
+        self.assertEquals(info.exception.message, 'Each line must be a single key=value entry, not `=`')
 
-        # OK 2
-        result = rcm.validate('a=b\nc=d\ne=f')
-        self.assertTrue(result)
-        self.assertEquals(result.details, '')
+        result = util.parse_key_value('a=b')
+        self.assertDictEqual(result, {'a':'b'})
+
+        result = util.parse_key_value('a=b\nc=d\ne=f')
+        self.assertDictEqual(result, {'a':'b', 'c':'d', 'e':'f'})
+
+        result = util.parse_key_value('a=b\nc=1\nd=2')
+        self.assertDictEqual(result, {'a':'b', 'c':1, 'd':2})
+
+        result = util.parse_key_value('a=b\nc=d\ne=f\ng={"aaa":"bbb", "ccc":"ddd", "eee":123}')
+        self.assertDictEqual(result, {'a':'b', 'c':'d', 'e':'f', 'g':{'aaa':'bbb', 'ccc':'ddd', 'eee':123}})
