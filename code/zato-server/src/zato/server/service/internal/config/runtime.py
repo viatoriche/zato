@@ -99,6 +99,23 @@ class RuntimeConfigManager(object):
         """
         return self.items
 
+    def get_full_path(self, name, pickup_dir=None):
+        """ Returns full path to a config file
+        """
+        for item in self.items:
+            if item['name'] == name and item['pickup_dir'] == pickup_dir:
+                return item['full_path']
+        else:
+            raise ValueError('No such item `{}` ({})'.format(name, pickup_dir))
+
+    # API-wise it makes sense to add a separate function
+    exists = get_full_path
+
+    def get_source(self, name, pickup_dir=None):
+        """ Returns source of a selected config file.
+        """
+        return open(self.get_full_path(name, pickup_dir)).read()
+
     def validate(self, source):
         """ Validates a config file's source.
         """
@@ -112,7 +129,6 @@ class RuntimeConfigManager(object):
                 config = ConfigObj(StringIO(source))
             except Exception, e:
                 details = e.message
-                print(9090, format_exc(e))
 
         return ValidationResult(details, config)
 
@@ -134,6 +150,7 @@ class GetList(AdminService):
     """ Returns a list of run-time config files available.
     """
     name = 'tmp.runtime.get-list'
+
     class SimpleIO(AdminSIO):
         request_elem = 'zato_config_runtime_get_list_request'
         response_elem = 'zato_config_runtime_get_list_response'
@@ -144,3 +161,40 @@ class GetList(AdminService):
 
     def handle(self):
         self.response.payload[:] = RuntimeConfigManager(self.server).get_items()
+
+# ################################################################################################################################
+
+class GetSource(AdminService):
+    """ Returns source (contents) of a selected run-time config file.
+    """
+    name = 'tmp.runtime.get-source'
+
+    class SimpleIO(AdminSIO):
+        request_elem = 'zato_config_runtime_get_source_request'
+        response_elem = 'zato_config_runtime_get_list_response'
+        input_required = ('cluster_id', 'name')
+        input_optional = ('pickup_dir',)
+        output_optional = ('source',)
+
+    def handle(self):
+        self.response.payload = RuntimeConfigManager(self.server).validate(self.request.input.name, self.request.input.pickup_dir)
+
+# ################################################################################################################################
+
+class Validate(AdminService):
+    """ Validates a given config file's contents.
+    """
+    name = 'tmp.runtime.validate'
+
+    class SimpleIO(AdminSIO):
+        request_elem = 'zato_config_runtime_validate_request'
+        response_elem = 'zato_config_runtime_validate_response'
+        input_required = ('cluster_id', 'source')
+        output_required = ('is_valid',)
+        output_optional = ('details',)
+
+    def handle(self):
+        result = RuntimeConfigManager(self.server).validate(self.request.input.source)
+
+        self.response.payload.is_valid = result.is_valid
+        self.response.payload.details = result.details

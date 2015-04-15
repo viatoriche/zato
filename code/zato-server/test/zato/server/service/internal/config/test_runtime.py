@@ -93,7 +93,7 @@ class TestRuntimeConfigManager(TestCase):
             rmtree(config.file_loc_dir1)
             rmtree(config.file_loc_dir2)
 
-    def xtest_get_items(self):
+    def test_get_items(self):
 
         def assert_func(rcm, config):
             config._file1 = self._get_item(config.items, 'file1_name')
@@ -129,7 +129,7 @@ class TestRuntimeConfigManager(TestCase):
 
         self._run_test(assert_func)
 
-    def xtest_edit(self):
+    def test_edit(self):
 
         def assert_func(rcm, config):
 
@@ -153,11 +153,61 @@ class TestRuntimeConfigManager(TestCase):
             self.assertFalse(result)
             self.assertEquals(result.details, 'Config file is empty')
 
-            result = rcm.validate('[abc]\naa=bb\ncc=dd\ncc2=123\n[def]\nee=ff\ngg=hh\nzzz=\n[qwe]\naa={"a":"b","c":123,"d":2.0}')
+            s = '[abc]\naa=bb\ncc=dd\ncc2=123\n[def]\nee=ff\ngg=hh\nzzz=\n[qwe]\naa={"a":"b","c":123,"d":2.0,"ee":{"ff":"gg"}}'
+
+            result = rcm.validate(s)
             self.assertTrue(result)
             self.assertListEqual(result.config.keys(), ['abc', 'def', 'qwe'])
             self.assertDictEqual(result.config['abc'], {'aa': 'bb', 'cc': 'dd', 'cc2': 123})
             self.assertDictEqual(result.config['def'], {'ee': 'ff', 'gg': 'hh', 'zzz': ''})
-            self.assertDictEqual(result.config['qwe'], {'aa': {'a': 'b', 'c': 123, 'd': 2.0}})
+            self.assertDictEqual(result.config['qwe'], {'aa': {'a': 'b', 'c': 123, 'd': 2.0, 'ee':{'ff':'gg'}}})
+
+        self._run_test(assert_func)
+
+    def test_get_source(self):
+
+        def assert_func(rcm, config):
+
+            # Good name, no pickup_dir
+            source = rcm.get_source('file1_name')
+            self.assertEquals(open(config.file1_name).read(), source)
+
+            # Good name, good pickup_dir
+            source = rcm.get_source(config.file4_name, config.pickup_dir1)
+            self.assertEquals(open(os.path.join(config.pickup_dir1, config.file4_name)).read(), source)
+
+            # Good name, incorrect pickup_dir
+            self.assertRaises(ValueError, rcm.get_source, config.file4_name, rand_string())
+
+            # Incorrect name, no pickup_dir
+            self.assertRaises(ValueError, rcm.get_source, rand_string())
+
+            # Incorrect name, good pickup_dir
+            self.assertRaises(ValueError, rcm.get_source, rand_string(), config.pickup_dir1)
+
+        self._run_test(assert_func)
+
+    def test_get_full_path_exists(self):
+
+        def assert_func(rcm, config):
+
+            for name in ('get_full_path', 'exists'):
+
+                func = getattr(rcm, name)
+
+                # Good name, no pickup_dir
+                self.assertTrue(func('file1_name'))
+
+                # Good name, good pickup_dir
+                self.assertTrue(func(config.file4_name, config.pickup_dir1))
+
+                # Good name, incorrect pickup_dir
+                self.assertRaises(ValueError, func, config.file4_name, rand_string())
+
+                # Incorrect name, no pickup_dir
+                self.assertRaises(ValueError, func, rand_string())
+
+                # Incorrect name, good pickup_dir
+                self.assertRaises(ValueError, func, rand_string(), config.pickup_dir1)
 
         self._run_test(assert_func)
