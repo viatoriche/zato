@@ -139,10 +139,18 @@ class RuntimeConfigManager(object):
         if not result:
             raise ValueError('Invalid config file: `{}`'.format(result.details))
 
+        # Will raise a ValueError if there is no such name or pickup_dir
+        full_path = self.get_full_path(name, pickup_dir)
+
+        # Ok, at that point we know that the source code is valid and that the path is OK,
+        # so we can save the file now.
+        f = open(full_path, 'wb')
+        f.write(source)
+        f.close()
+
     def create(self, name, pickup_dir, source):
-        """ Creates a new config file.
+        """ Creates a new config file in of the already existing pick directories.
         """
-        pass
 
 # ################################################################################################################################
 

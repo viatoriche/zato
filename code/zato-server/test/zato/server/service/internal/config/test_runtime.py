@@ -134,13 +134,18 @@ class TestRuntimeConfigManager(TestCase):
         def assert_func(rcm, config):
 
             # Invalid source
-            rcm.edit
+            self.assertRaises(ValueError, rcm.edit, config.file4_name, config.pickup_dir1, rand_string())
 
             # No such pickup dir
-            rcm.edit
+            self.assertRaises(ValueError, rcm.edit, config.file4_name, rand_string(), '[zzz]\na=b')
 
-            # No such file (outside of pickup dir)
-            rcm.edit
+            # No such file (but a valid pickup dir)
+            self.assertRaises(ValueError, rcm.edit, rand_string(), config.pickup_dir1, '[zzz]\na=b')
+
+            # All good
+            valid_source = '[zzz]\na=b'
+            rcm.edit(config.file4_name, config.pickup_dir1, valid_source)
+            self.assertEquals(open(os.path.join(config.pickup_dir1, config.file4_name)).read(), valid_source)
 
         self._run_test(assert_func)
 

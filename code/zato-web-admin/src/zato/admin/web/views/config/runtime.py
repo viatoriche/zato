@@ -46,7 +46,7 @@ class Index(_Index):
 def edit(req, name, pickup_dir, cluster_id):
 
     return_data = {
-        'form': EditFileSourceForm(),
+        'form': EditFileSourceForm({'source':'zzz'}),
         'name': name,
         'pickup_dir': pickup_dir,
         'cluster_id': cluster_id
