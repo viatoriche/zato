@@ -149,8 +149,26 @@ class RuntimeConfigManager(object):
         f.close()
 
     def create(self, name, pickup_dir, source):
-        """ Creates a new config file in of the already existing pick directories.
+        """ Creates a new config file in of the already existing pick up directories.
         """
+        result = self.validate(source)
+        if not result:
+            raise ValueError('Invalid config file: `{}`'.format(result.details))
+
+        if pickup_dir not in self.server.fs_server_config.runtime_config.pickup_dir:
+            raise ValueError('Invalid pickup dir: `{}`'.format(pickup_dir))
+
+        # Ok, the config itself is valid and we know the pickup dir is a known one
+        # so we can actually store in in the file system.
+
+        if not p.isabs(pickup_dir):
+            full_path = p.normpath(p.join(self.server.repo_location, pickup_dir, name))
+        else:
+            full_path = p.join(pickup_dir, name)
+
+        f = open(full_path, 'wb')
+        f.write(source)
+        f.close()
 
 # ################################################################################################################################
 

@@ -149,6 +149,26 @@ class TestRuntimeConfigManager(TestCase):
 
         self._run_test(assert_func)
 
+    def test_create(self):
+
+        def assert_func(rcm, config):
+
+            valid_source = '[zzz]\na=b'
+
+            # No source
+            self.assertRaises(ValueError, rcm.create, rand_string(), config.pickup_dir1, None)
+            self.assertRaises(ValueError, rcm.create, rand_string(), config.pickup_dir1, '')
+
+            # Unknown pickup dir
+            self.assertRaises(ValueError, rcm.create, rand_string(), rand_string(), valid_source)
+
+            # All good
+            config_file_name = rand_string()
+            rcm.create(config_file_name, config.pickup_dir1, valid_source)
+            self.assertEquals(open(os.path.join(config.pickup_dir1, config_file_name)).read(), valid_source)
+
+        self._run_test(assert_func)
+
     def test_validate(self):
 
         def assert_func(rcm, config):
