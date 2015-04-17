@@ -132,22 +132,6 @@ class RuntimeConfigManager(object):
 
         return ValidationResult(details, config)
 
-    def edit(self, name, pickup_dir, source):
-        """ Validates and updates contents of an existing config file.
-        """
-        result = self.validate(source)
-        if not result:
-            raise ValueError('Invalid config file: `{}`'.format(result.details))
-
-        # Will raise a ValueError if there is no such name or pickup_dir
-        full_path = self.get_full_path(name, pickup_dir)
-
-        # Ok, at that point we know that the source code is valid and that the path is OK,
-        # so we can save the file now.
-        f = open(full_path, 'wb')
-        f.write(source)
-        f.close()
-
     def create(self, name, pickup_dir, source):
         """ Creates a new config file in of the already existing pick up directories.
         """
@@ -166,6 +150,22 @@ class RuntimeConfigManager(object):
         else:
             full_path = p.join(pickup_dir, name)
 
+        f = open(full_path, 'wb')
+        f.write(source)
+        f.close()
+
+    def edit(self, name, pickup_dir, source):
+        """ Validates and updates contents of an existing config file.
+        """
+        result = self.validate(source)
+        if not result:
+            raise ValueError('Invalid config file: `{}`'.format(result.details))
+
+        # Will raise a ValueError if there is no such name or pickup_dir
+        full_path = self.get_full_path(name, pickup_dir)
+
+        # Ok, at that point we know that the source code is valid and that the path is OK,
+        # so we can save the file now.
         f = open(full_path, 'wb')
         f.write(source)
         f.close()
@@ -203,7 +203,8 @@ class GetSource(AdminService):
         output_optional = ('source',)
 
     def handle(self):
-        self.response.payload = RuntimeConfigManager(self.server).validate(self.request.input.name, self.request.input.pickup_dir)
+        self.response.payload = RuntimeConfigManager(self.server).get_source(
+            self.request.input.name, self.request.input.pickup_dir)
 
 # ################################################################################################################################
 
@@ -224,3 +225,34 @@ class Validate(AdminService):
 
         self.response.payload.is_valid = result.is_valid
         self.response.payload.details = result.details
+
+# ################################################################################################################################
+
+class Create(AdminService):
+    """ Creates a new config file with an initial contents in a given pickup dir.
+    """
+    name = 'tmp.runtime.create'
+
+    class SimpleIO(AdminSIO):
+        request_elem = 'zato_config_runtime_create_request'
+        response_elem = 'zato_config_runtime_create_response'
+        input_required = ('cluster_id', 'name', 'pickup_dir', 'source')
+
+    def handle(self):
+        RuntimeConfigManager(self.server).create(**self.request.input)
+
+# ################################################################################################################################
+
+class Edit(AdminService):
+    """ Updates an already existing config file.
+    """
+    name = 'tmp.runtime.edit'
+
+    class SimpleIO(AdminSIO):
+        request_elem = 'zato_config_runtime_edit_request'
+        response_elem = 'zato_config_runtime_edit_response'
+        input_required = ('cluster_id', 'name', 'source')
+        input_optional = ('pickup_dir',)
+
+    def handle(self):
+        RuntimeConfigManager(self.server).edit(**self.request.input)
