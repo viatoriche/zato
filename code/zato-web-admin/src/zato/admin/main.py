@@ -22,7 +22,8 @@ except ImportError:
 import json, os
 
 # Django
-from django.core.management import call_command, execute_manager
+import django
+from django.core.management import call_command, execute_from_command_line
 
 # Zato
 from zato.admin.zato_settings import update_globals
@@ -39,14 +40,16 @@ def main():
     update_globals(config)
 
     os.environ['DJANGO_SETTINGS_MODULE'] = 'zato.admin.settings'
+    django.setup()
     call_command('loaddata', os.path.join(repo_dir, 'initial-data.json'))
 
     RepoManager(repo_dir).ensure_repo_consistency()
 
     # Cannot be imported before update_globals does its job of updating settings' configuration
-    from zato.admin import settings
+    #from zato.admin import settings
 
-    execute_manager(settings, ['zato-web-admin', 'runserver', '--noreload', '{host}:{port}'.format(**config)])
+    #execute_from_command_line(settings, ['zato-web-admin', 'runserver', '--noreload', '{host}:{port}'.format(**config)])
+    execute_from_command_line(['zato-web-admin', 'runserver', '--noreload', '{host}:{port}'.format(**config)])
 
 if __name__ == '__main__':
     main()
