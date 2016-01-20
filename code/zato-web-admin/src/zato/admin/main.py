@@ -12,6 +12,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import cloghandler
 cloghandler = cloghandler # For pyflakes
 
+# stdlib
+import logging
+from traceback import format_exc
+
+# MySQL
 try:
     import pymysql
     pymysql.install_as_MySQLdb()
@@ -23,12 +28,18 @@ import json, os
 
 # Django
 import django
+from django.db.utils import OperationalError
 from django.core.management import call_command, execute_from_command_line
 
 # Zato
 from zato.admin.zato_settings import update_globals
 from zato.common.repo import RepoManager
 from zato.common.util import store_pidfile
+
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s - %(levelname)s - %(process)d:%(threadName)s - %(name)s:%(lineno)d - %(message)s')
+
+logger = logging.getLogger(__name__)
 
 def main():
     store_pidfile(os.path.abspath('.'))
@@ -44,11 +55,6 @@ def main():
     call_command('loaddata', os.path.join(repo_dir, 'initial-data.json'))
 
     RepoManager(repo_dir).ensure_repo_consistency()
-
-    # Cannot be imported before update_globals does its job of updating settings' configuration
-    #from zato.admin import settings
-
-    #execute_from_command_line(settings, ['zato-web-admin', 'runserver', '--noreload', '{host}:{port}'.format(**config)])
     execute_from_command_line(['zato-web-admin', 'runserver', '--noreload', '{host}:{port}'.format(**config)])
 
 if __name__ == '__main__':
