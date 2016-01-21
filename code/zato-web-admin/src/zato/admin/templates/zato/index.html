@@ -30,9 +30,9 @@
     {% comment %} Our CSS must come last {% endcomment %}
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 
-    {% block extra_css %}{% endblock %}
+    {% block "extra_css" %}{% endblock %}
 
-    {% block extra_js %}
+    {% block "extra_js" %}
     {% endblock %}
 
 {% endblock %}
@@ -280,7 +280,7 @@
 
         <div id="bd">
         <div id="yui-main">
-            <div class="yui-b">{% block content %}{% endblock %}</div>
+            <div class="yui-b">{% block "content" %}{% endblock %}</div>
         </div>
     </div>
 </div>
