@@ -229,7 +229,7 @@ def overview(req, service_name):
                 getattr(service, channel_type.replace('jms-', '') + '_channels').extend(channels)
 
             for item in req.zato.client.invoke('zato.service.get-deployment-info-list', {'id': service.id}):
-                service.deployment_info.append(DeploymentInfo(item.server_name, loads(item.details)))
+                service.deployment_info.append(DeploymentInfo(item.server_name, item.details))
 
             # TODO: There needs to be a new service added zato.service.scheduler.job.get-by-service
             #       or .get-list should start accept a service name. Right now we pull all the
@@ -444,7 +444,7 @@ def last_stats(req, service_id, cluster_id):
         msg = 'Caught an exception while invoking zato.service.get-by-service, e:[{}]'.format(format_exc(e))
         logger.error(msg)
 
-    return HttpResponse(dumps(return_data), mimetype='application/javascript')
+    return HttpResponse(dumps(return_data), content_type='application/javascript')
 
 
 @method_allowed('GET')

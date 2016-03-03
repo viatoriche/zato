@@ -26,8 +26,10 @@ from pwd import getpwuid
 from random import getrandbits
 from socket import gethostname, getfqdn
 from string import Template
+from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
 from threading import current_thread
+from time import sleep
 from traceback import format_exc
 from urlparse import urlparse
 
@@ -205,8 +207,7 @@ class ColorFormatter(logging.Formatter):
 
     def __init__(self, fmt):
         self.use_color = True
-        msg = self.formatter_msg(fmt, self.use_color)
-        logging.Formatter.__init__(self, msg)
+        super(ColorFormatter, self).__init__(fmt)
 
     def formatter_msg(self, msg, use_color=True):
         if use_color:
@@ -636,13 +637,16 @@ def get_service_by_name(session, cluster_id, name):
            filter(Service.name==name).\
            one()
 
-def add_startup_jobs(cluster_id, odb, stats_jobs):
-    """ Adds one of the interval jobs to the ODB. Note that it isn't being added
+def add_startup_jobs(cluster_id, odb, jobs, stats_enabled):
+    """ Adds internal jobs to the ODB. Note that it isn't being added
     directly to the scheduler because we want users to be able to fine-tune the job's
     settings.
     """
     with closing(odb.session()) as session:
-        for item in stats_jobs:
+        for item in jobs:
+
+            if not stats_enabled and item['name'].startswith('zato.stats'):
+                continue
 
             try:
                 service_id = get_service_by_name(session, cluster_id, item['service'])[0]
@@ -1105,6 +1109,8 @@ def startup_service_payload_from_path(name, value, repo_location):
     else:
         return payload
 
+# ################################################################################################################################
+
 def invoke_startup_services(
         source, key, fs_server_config, repo_location, broker_client=None, service_name=None, skip_include=True, worker_store=None):
     """ Invoked when we are the first worker and we know we have a broker client and all the other config ready
@@ -1144,3 +1150,30 @@ def invoke_startup_services(
             broker_client.invoke_async(msg)
         else:
             worker_store.on_message_invoke_service(msg, msg['channel'], msg['action'])
+
+# ################################################################################################################################
+
+def timeouting_popen(command, timeout, timeout_msg, rc_non_zero_msg, common_msg=''):
+    """ Runs a command in background and returns its return_code, stdout and stderr.
+    stdout and stderr will be None if return code = 0
+    """
+    stdout, stderr = None, None
+
+    # Run the command
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
+
+    # Sleep as long as requested and poll for results
+    sleep(timeout)
+    p.poll()
+
+    if p.returncode is None:
+        msg = timeout_msg + common_msg + 'command:[{}]'.format(command)
+        raise Exception(msg.format(timeout))
+    else:
+        if p.returncode != 0:
+            stdout, stderr = p.communicate()
+            msg = rc_non_zero_msg + common_msg + 'command:[{}], return code:[{}], stdout:[{}], stderr:[{}] '.format(
+                command, p.returncode, stdout, stderr)
+            raise Exception(msg)
+
+    return p.returncode
